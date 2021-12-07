@@ -1,0 +1,70 @@
+
+
+apache_config_user: apache
+apache_config_group: apache
+apache_config_service_name: httpd
+apache_config_server_root: /etc/httpd
+apache_config_log_dir: /var/log/httpd
+
+apache_config_tree:
+  - "{{apache_config_server_root}}"
+  - "{{apache_config_server_root}}/conf"
+  - "{{apache_config_server_root}}/conf.d"
+
+apache_config_clean_directories:
+  - "conf"
+  - "conf.d"
+
+
+#-- document root from which to serve files
+apache_config_document_root_parent: "/var/www/"
+apache_config_document_root: "{{apache_config_document_root_parent}}/html"
+
+apache_config_main_config_dir: "{{apache_config_server_root}}/conf"
+apache_config_additional_config_dir: "{{apache_config_server_root}}/conf.d"
+apache_config_vhost_dir: "{{apache_config_server_root}}/conf.d"
+
+apache_config_main_config_files:
+  - "httpd.conf"
+  - "magic"
+
+apache_config_additional_config_files:
+    - 01-default.conf
+    - 10-ssl-centos.conf
+    - 20-status.conf
+    - 21-caching.conf
+    - 22-deflate.conf
+    - welcome.conf
+
+
+#-- list of module that should be loaded
+apache_config_modules:
+  #-- minimal set
+  - log_config
+  - mime
+  - dir
+  - authz_core
+  - unixd
+  - authz_host
+  - autoindex
+  #-- base
+  - systemd
+  - rewrite
+  #-- mpm: prefork
+  - mpm_prefork
+  #-- ssl
+  - ssl
+  - setenvif
+  - socache_shmcb
+  #-- status
+  - status
+  - info
+  #-- for caching
+  - headers
+  - expires
+  - deflate
+  - filter
+
+#-- SSL config (default)
+apache_config_ssl_default_ssl_certificate_file: /etc/pki/tls/certs/localhost.crt
+apache_config_ssl_default_ssl_certificate_keyfile: /etc/pki/tls/private/localhost.key

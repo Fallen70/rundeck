@@ -1,0 +1,57 @@
+# install openjdk and apache base
+- hosts: rundeck_servers
+  remote_user: root
+  become: yes
+  become_method: sudo
+  roles:
+    - role: openjdk-package
+      openjdk_version_major: 8
+    - role: apache
+    - role: apache-config-base
+
+
+# copy certificates 
+- hosts: rundeck_servers
+  remote_user: root
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: "Copie des cert"
+      copy:
+        src: "{{ inventory_hostname }}/{{ item }}"
+        dest: "/{{ item }}"
+        owner: root
+        group: root
+      with_items:
+        - "{{ apache_rp_ssl_cert }}"
+        - "{{ apache_rp_ssl_key }}" 
+  tags: always
+
+# install apache rp, rundeck and firewalld
+- hosts: rundeck_servers
+  remote_user: root
+  become: yes
+  become_method: sudo
+  roles:
+    - role: apache-config-rp
+    - role: rundeck
+    - role: firewalld
+      firewalld_enable: true
+      firewalld_services:
+        - "ssh" 
+        - "http"
+        - "https"
+      firewalld_ports:
+        - "4440/tcp" 
+
+- hosts: rundeck_monitored_servers
+  remote_user: root
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: "Authorisation for monitored servers" 
+      authorized_key:
+        user: "{{rundeck_username}}"
+        state: present
+        key: "{{ lookup('file', 'files/{{ rundeck_hostname }}/ssh_pub/id_rsa.pub') }}"
+  tags: always

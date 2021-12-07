@@ -1,0 +1,8 @@
+
+#--
+# activate all tasks related to installation
+do_install: true
+
+#--
+# version of the apache serveur
+apache_version: "2.4.*"

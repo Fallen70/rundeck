@@ -1,0 +1,40 @@
+
+#--
+# activate all tasks related to system dependencies
+do_deps: false
+
+#--
+# activate all tasks related to installation
+do_install: true
+
+#--
+# activate all tasks related to uninstalling the distribution files
+do_uninstall_distrib: false
+
+#--
+# activate all tasks related to removing the data
+do_drop_data: false
+
+#--
+# activate all tasks related to uninstallation
+do_uninstall_all: false
+
+# rundeck_name: DEFINED in group_vars
+# rundeck_hostname: DEFINDE in group_vars
+rundeck_port: 4440
+# rundeck_uuid: DEFINED in group_vars
+rundeck_user: ansible
+rundeck_password: ansible
+postfix_relayhost: lyosendmail.swordgroup.lan
+
+# Postgres configuration
+postgres_rundeck_database: rundeck
+postgres_rundeck_user: rundeck
+postgres_rundeck_password: 2und3ck
+postgresql_data_dir_default: /var/lib/pgsql/data/
+postgresql_setup_bin: /usr/bin/postgresql-setup
+
+postgresql_host: localhost
+postgresql_user: postgres 
+postgresql_group: postgres
+

@@ -1,0 +1,35 @@
+<joblist>
+  <job>
+    <context>
+      <options preserveOrder='true'>
+        <option name='host' required='true'>
+          <label>Domaine dont on veut récupérer le/les certificats</label>
+        </option>
+        <option name='port' required='true' value='443'>
+          <label>Port a scanner</label>
+        </option>
+      </options>
+    </context>
+    <defaultTab>nodes</defaultTab>
+    <description><![CDATA[Job pour récupérer les certificats avec la commande openssl
+nécessite une valeur host et port.
+stocke les certificats dans /tmp/certs]]></description>
+    <executionEnabled>{% if job.uuid in jobs_disable_execution %}false{% else %}true{% endif %}</executionEnabled>
+    <group>System/Util/Certs/Common</group>
+    <id>{{ job.uuid }}</id>
+    <loglevel>INFO</loglevel>
+    <name>{{ job.name | default('Download certificate') }}</name>
+    <nodeFilterEditable>true</nodeFilterEditable>
+    <plugins />
+    <scheduleEnabled>true</scheduleEnabled>
+    <sequence keepgoing='false' strategy='node-first'>
+      <command>
+        <script><![CDATA[rm -rf /tmp/certs/
+mkdir -p /tmp/certs/
+openssl s_client -showcerts -connect $RD_OPTION_HOST:$RD_OPTION_PORT </dev/null 2>/dev/null | sed -n "/BEGIN CERTIFICATE/,/END CERTIFICATE/p" | awk 'BEGIN {c=0;} /BEGIN CERT/{c++} { print > "/tmp/certs/cert." c ".pem"}']]></script>
+        <scriptargs />
+      </command>
+    </sequence>
+    <uuid>{{ job.uuid }}</uuid>
+  </job>
+</joblist>

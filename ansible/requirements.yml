@@ -1,0 +1,6 @@
+#TODO réécriture de la partie galaxy
+- name: openjdk-package
+
+- name: apache
+
+- name: firewalld

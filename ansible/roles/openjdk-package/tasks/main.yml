@@ -1,0 +1,67 @@
+#
+#
+# Ansible role for openjdk
+#
+#
+#-------------------------------------------------------------------------------
+# Check OS is supported
+#-------------------------------------------------------------------------------
+- set_fact:
+    os_distribution_version: "{{ansible_distribution}}-{{ansible_distribution_major_version}}"
+  tags: always
+
+- name: "Check {{os_distribution_version}} is supported by this role"
+  fail: msg="OS '{{ os_distribution_version }}' is not supported for this role"
+  when: "os_distribution_version not in role_supported_os"
+
+#-------------------------------------------------------------------------------
+# Load variable from OS Specific locations
+#-------------------------------------------------------------------------------
+- name: Gather OS Specific Variables for {{ansible_distribution}}-{{ansible_distribution_major_version}}
+  include_vars: "{{item}}"
+  with_first_found:
+    - files:
+      - "../vars/vars-{{ansible_distribution}}-{{ansible_distribution_major_version}}.yml"
+      - "../vars/vars-{{ansible_distribution}}.yml"
+      skip: true
+
+# Note: using ansible 2.8+, remove skip parameter and replace with
+# ignore_errors: true
+# at same level as with_first_found
+
+#-------------------------------------------------------------------------------
+# check variables
+# This makes sure that all variables defined in the required_vars list are
+# defined prior to starting the role tasks
+#-------------------------------------------------------------------------------
+- name: "Check required variables"
+  fail: msg="Variable '{{item}}' is not defined"
+  when: item not in vars
+  with_items: "{{required_vars}}"
+
+#-------------------------------------------------------------------------------
+# check java version is suipported by this role
+#-------------------------------------------------------------------------------
+- name: "Ensure java version {{openjdk_version_major}} is supported by this role"
+  fail: msg="openjdk '{{ openjdk_version_major }}' is not supported for this role"
+  when: "openjdk_version_major not in openjdk_supported_versions"
+
+#-------------------------------------------------------------------------------
+- include_tasks: "{{file_item}}"
+  with_first_found:
+    - "110-uninstall-{{ansible_distribution}}-{{ansible_distribution_major_version}}.yml"
+    - "110-uninstall-{{ansible_distribution}}.yml"
+    - "110-uninstall.yml"
+  loop_control:
+    loop_var: file_item
+  when : (do_uninstall_distrib|bool) or (do_uninstall_all|bool)
+
+#-------------------------------------------------------------------------------
+- include_tasks: "{{file_item}}"
+  with_first_found:
+    - "021-install-{{ansible_distribution}}-{{ansible_distribution_major_version}}.yml"
+    - "021-install-{{ansible_distribution}}.yml"
+    - "021-install.yml"
+  loop_control:
+    loop_var: file_item
+  when : (do_install|bool)

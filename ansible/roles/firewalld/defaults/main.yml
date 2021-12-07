@@ -1,0 +1,13 @@
+
+
+#--
+# activate all tasks related to installation
+do_install: true
+
+#--
+# enable the firewalld service
+firewalld_enable: true
+
+#--
+# a list of rules to apply
+firewalld_rules: []

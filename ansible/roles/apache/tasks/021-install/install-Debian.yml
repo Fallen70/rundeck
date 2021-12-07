@@ -1,0 +1,9 @@
+
+
+#-- ensure package installation
+- name : "Ensure package installation"
+  apt:
+    name:
+      - "python-apt"
+      - "apache2={{apache_version}}"
+    state: present

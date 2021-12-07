@@ -1,0 +1,13 @@
+#--
+- debug:
+    msg: "This is the service.yml task list"
+
+- name: enable service rundeckd
+  systemd: name=rundeckd enabled=yes
+
+#--- restart service
+- name: restart service rundeckd
+  service: name=rundeckd state=restarted
+
+- name: restart service postfix
+  service: name=postfix state=restarted

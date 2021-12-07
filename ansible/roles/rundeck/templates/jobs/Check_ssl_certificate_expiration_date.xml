@@ -1,0 +1,69 @@
+<joblist>
+  <job>
+    <defaultTab>nodes</defaultTab>
+    <description><![CDATA[Controle expiration date of SSL certificates.
+Send alert if the certificate expire in X day, parameterized in script. ]]></description>
+    <dispatch>
+      <excludePrecedence>true</excludePrecedence>
+      <keepgoing>true</keepgoing>
+      <rankOrder>ascending</rankOrder>
+      <successOnEmptyNodeFilter>false</successOnEmptyNodeFilter>
+      <threadcount>1</threadcount>
+    </dispatch>
+    <executionEnabled>{% if job.uuid in jobs_disable_execution %}false{% else %}true{% endif %}</executionEnabled>
+    <group>System/Scheduled</group>
+    <id>{{job.uuid}}</id>
+    <loglevel>INFO</loglevel>
+    <name>Check ssl certificate expiration date</name>
+    <nodeFilterEditable>false</nodeFilterEditable>
+    <nodefilters>
+      <filter>{{job.filter}}</filter>
+    </nodefilters>
+    <nodesSelectedByDefault>true</nodesSelectedByDefault>
+    <notification>
+      <onfailure>
+        <email attachLog='true' attachLogInFile='true' recipients='{{job.recipients}}' subject='{{job.subject}}'/>
+      </onfailure>
+    </notification>
+    <notifyAvgDurationThreshold />
+    <schedule>
+      <month month='*' />
+      <time hour='00' minute='06' seconds='0' />
+      <weekday day='*' />
+      <year year='*' />
+    </schedule>
+    <scheduleEnabled>true</scheduleEnabled>
+    <sequence keepgoing='false' strategy='parallel'>
+      <command>
+        <script><![CDATA[#!/bin/sh
+
+HOSTNAME="localhost"
+PORT="443"
+ALERT_X_DAY_BEFORE=10
+
+# Get current date as timestamp
+CURR_DATE=$(date +%s)
+
+# Get enddate from certificate of hostname:port identified
+CERT_DATE_AS_STRING=$(echo | openssl s_client -connect ${HOSTNAME}:${PORT} 2>/dev/null | openssl x509 -enddate -noout | cut -d '=' -f 2)                                                                            
+
+CERT_EXP_DATE=$(date --date="${CERT_DATE_AS_STRING}" +%s)
+
+DAYS_REMAINING=$(( ( $CERT_EXP_DATE - $CURR_DATE ) / 86400 ))
+
+if [ $DAYS_REMAINING -lt 0 ]; then
+  echo "Certificat expiré  sur $(hostname -f)"
+  exit 1;
+fi
+
+if [ $DAYS_REMAINING -lt $ALERT_X_DAY_BEFORE ]; then
+  echo "$DAYS_REMAINING jours avant expiration sur $(hostname -f)"
+  exit 1;
+fi
+]]></script>
+        <scriptargs />
+      </command>
+    </sequence>
+    <uuid>{{job.uuid}}</uuid>
+  </job>
+</joblist>

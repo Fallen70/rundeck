@@ -1,0 +1,7 @@
+
+
+#--
+- name: "ensure package {{openjdk_package}}"
+  yum:
+    name: "{{openjdk_package}}"
+    state: latest

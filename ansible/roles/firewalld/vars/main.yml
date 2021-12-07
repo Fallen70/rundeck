@@ -1,0 +1,21 @@
+
+#--
+# This list records all variable that must be defined at role execution
+required_vars:
+  - do_install
+  - role_supported_os
+  - dependencies
+  - firewalld_enable
+
+#--
+# a list of supported os formated as the result of :
+# {{ansible_distribution}}-{{ansible_distribution_major_version}}
+#
+# values for ansible_distribution (CentOS, RedHat, Debian)
+#
+role_supported_os:
+  - CentOS-7
+
+#--
+# a list of dependencies that should be installed at deps stage
+dependencies:

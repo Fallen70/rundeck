@@ -1,0 +1,102 @@
+<joblist>
+  <job>
+    <context>
+      <options preserveOrder='true'>
+        <option name='host' required='true'>
+          <label>FQDN du registry</label>
+        </option>
+        <option name='key_duration' required='true' value='365'>
+          <label>Durée de validité en jours</label>
+        </option>
+        <option name='key_size' required='true' value='2048'>
+          <label>Taille de la clef a générer</label>
+        </option>
+        <option name='crt_file' required='true' value='/etc/pki/tls/certs/server.crt'>
+          <label>Chemin du fichier crt</label>
+        </option>
+        <option name='key_file' required='true' value='/etc/pki/tls/private/server.key'>
+          <label>Chemin du fichier key</label>
+        </option>
+      </options>
+    </context>
+    <defaultTab>nodes</defaultTab>
+    <description>Génére et met a jour le certificat d'un service httpd.</description>
+    <dispatch>
+      <excludePrecedence>true</excludePrecedence>
+      <keepgoing>false</keepgoing>
+      <rankOrder>ascending</rankOrder>
+      <successOnEmptyNodeFilter>false</successOnEmptyNodeFilter>
+      <threadcount>1</threadcount>
+    </dispatch>
+    <executionEnabled>{% if job.uuid in jobs_disable_execution %}false{% else %}true{% endif %}</executionEnabled>
+    <group>System/Util/Certs/Server</group>
+    <id>{{ job.uuid }}</id>
+    <loglevel>INFO</loglevel>
+    <name>{{ job.name | default('Update cert httpd server') }}</name>
+    <nodeFilterEditable>true</nodeFilterEditable>
+    <nodefilters>
+      <filter>tag:changeme</filter>
+    </nodefilters>
+    <nodesSelectedByDefault>true</nodesSelectedByDefault>
+    <notification>
+      <onsuccess>
+        <email attachLog='true' attachLogInFile='true' recipients='{{ job.recipients }}' subject='Mise à jour des certificats du service httpd de ${option.host}' />
+      </onsuccess>
+    </notification>
+    <notifyAvgDurationThreshold />
+    <plugins />
+    <scheduleEnabled>true</scheduleEnabled>
+    <sequence keepgoing='false' strategy='node-first'>
+      <command>
+        <description>Génération du certificat</description>
+        <jobref group='System/Util/Certs/Common' name='Genrate self signed cert'>
+          <importOptions>true</importOptions>
+          <uuid>{{ job.generate_job_uuid }}</uuid>
+        </jobref>
+      </command>
+      <command>
+        <description>Nettoyage du dossier temporaire</description>
+        <script><![CDATA[#!/bin/bash
+# Nettoyage du dossier temporaire
+
+rm -vrf /tmp/@option.host@
+mkdir -vp /tmp/@option.host@]]></script>
+        <scriptargs />
+      </command>
+      <command>
+        <description>Copie des fichiers</description>
+        <node-step-plugin type='copyfile'>
+          <configuration>
+            <entry key='destinationPath' value='/tmp/${option.host}' />
+            <entry key='echo' value='true' />
+            <entry key='pattern' value='${option.host}.*' />
+            <entry key='recursive' value='true' />
+            <entry key='sourcePath' value='/tmp/${option.host}/' />
+          </configuration>
+        </node-step-plugin>
+      </command>
+      <command>
+        <description>MAJ du certificat</description>
+        <script><![CDATA[# MAJ du certificat sur un service httpd
+
+# Backup des certificats courants
+mv -v @option.crt_file@ @option.crt_file@.back
+mv -v @option.key_file@ @option.key_file@.back
+
+# Copie des nouveaux certificats
+cp -v /tmp/@option.host@/@option.host@.crt @option.crt_file@
+cp -v /tmp/@option.host@/@option.host@.key @option.key_file@
+
+# Redémarrage du service 
+systemctl restart httpd
+]]></script>
+        <scriptargs />
+      </command>
+      <command>
+        <description>Log pour la MAJ de gitlab</description>
+        <exec>echo "scp -r root@${option.host}:/tmp/${option.host}/${option.host}.* ."</exec>
+      </command>
+    </sequence>
+    <uuid>{{ job.uuid }}</uuid>
+  </job>
+</joblist>

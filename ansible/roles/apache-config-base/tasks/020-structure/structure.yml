@@ -1,0 +1,24 @@
+#--
+- name: ensure group exists
+  group:
+    name: "{{apache_config_group}}"
+    system: no
+  when: apache_config_group != "root"
+
+#--
+- name : ensure user exists
+  user:
+    name: "{{apache_config_user}}"
+    group: "{{apache_config_group}}"
+  when: apache_config_user != "root"
+
+#--
+- name: ensure directory tree
+  file:
+    path: "{{item}}"
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: 0755
+  with_items:
+    - "{{apache_config_tree}}"

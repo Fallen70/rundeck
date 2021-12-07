@@ -1,0 +1,29 @@
+
+#--
+# activate all tasks related to system dependencies
+do_deps: false
+
+#--
+# activate all tasks related to installation
+do_install: true
+
+#--
+# activate all tasks related to uninstalling the distribution files
+do_uninstall_distrib: false
+
+#--
+# activate all tasks related to removing the data
+do_drop_data: false
+
+#--
+# activate all tasks related to uninstallation
+do_uninstall_all: false
+
+
+
+
+
+apache_config_vhosts:
+
+
+apache_config_vhosts_ssl:

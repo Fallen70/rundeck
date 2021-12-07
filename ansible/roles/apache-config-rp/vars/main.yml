@@ -1,0 +1,31 @@
+
+#--
+# This list records all variable that must be defined at role execution
+required_vars:
+  - do_deps
+  - do_install
+  - do_uninstall_all
+  - do_uninstall_distrib
+  - do_drop_data
+  - role_supported_os
+  - dependencies
+  - apache_config_server_root
+  - apache_config_service_name
+  - apache_config_modules
+  - apache_config_vhosts
+  - apache_config_vhosts_ssl
+
+
+#--
+# a list of supported os formated as the result of :
+# {{ansible_distribution}}-{{ansible_distribution_major_version}}
+#
+# values for ansible_distribution (CentOS, RedHat, Debian)
+#
+role_supported_os:
+  - CentOS-7
+  - Debian-8
+
+#--
+# a list of dependencies that should be installed at deps stage
+dependencies:

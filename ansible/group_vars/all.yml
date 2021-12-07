@@ -1,0 +1,15 @@
+rundeck_hostname: rundeck
+# user pour le rd client
+rundeck_user: ansible
+# mdp pour le rd client
+rundeck_password: CHANGEME
+rundeck_uuid: 57933a6c-8a71-4d90-82c3-9c7ee6c49166
+rundeck_recipients: julien.petitperrin@gmail.com
+rundeck_project: Mon projet
+
+# GUI Customisation :
+# https://docs.rundeck.com/docs/administration/configuration/gui-customization.html
+rundeck_gui:
+ - "rundeck.gui.instanceName=Prod"
+ - "rundeck.gui.title=Prod"
+

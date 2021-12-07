@@ -1,0 +1,15 @@
+- name: "Ensure additionnal modules"
+  lineinfile:
+    path: "{{apache_config_server_root}}/conf/modules.conf"
+    line: "LoadModule {{item}}_module modules/mod_{{item}}.so"
+  with_items:
+    - "{{apache_config_modules}}"
+
+#--
+- name: "Ensure additional configuration"
+  template:
+    src: "etc/httpd/conf.d/{{item}}"
+    dest: "{{apache_config_server_root}}/conf.d/{{item}}"
+  with_items:
+    - 31-vhost-proxy.conf
+    - 31-vhost-proxy-ssl.conf

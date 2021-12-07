@@ -1,0 +1,16 @@
+#--
+- name: "Ensure libsemanage-python"
+  yum:
+    name: libsemanage-python
+    state: present
+
+- name: "Ensure selinux configuration"
+  seboolean:
+    name: "{{item}}"
+    state: yes
+    persistent: yes
+  with_items:
+    - httpd_anon_write
+    - httpd_sys_script_anon_write
+    - httpd_can_network_relay
+    - httpd_can_network_connect

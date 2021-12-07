@@ -1,0 +1,5 @@
+#--
+- name: ensure openjdk rpm packages are uninstalled
+  package:
+    name: "{{openjdk_package}}"
+    state: removed

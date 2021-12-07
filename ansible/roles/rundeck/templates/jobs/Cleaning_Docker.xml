@@ -1,0 +1,48 @@
+<joblist>
+  <job>
+    <defaultTab>nodes</defaultTab>
+    <description>Ce job permet de nettoyer les espaces de stockage Docker</description>
+    <dispatch>
+      <excludePrecedence>true</excludePrecedence>
+      <keepgoing>true</keepgoing>
+      <rankOrder>ascending</rankOrder>
+      <successOnEmptyNodeFilter>false</successOnEmptyNodeFilter>
+      <threadcount>1</threadcount>
+    </dispatch>
+    <executionEnabled>{% if job.uuid in jobs_disable_execution %}false{% else %}true{% endif %}</executionEnabled>
+    <group>System/Scheduled</group>
+    <id>{{job.uuid}}</id>
+    <loglevel>INFO</loglevel>
+    <name>{{ job.name | default('Cleaning Docker') }}</name>
+    <nodeFilterEditable>false</nodeFilterEditable>
+    <nodefilters>
+      <filter>{{ job.filter | default('tags: docker') }}</filter>
+    </nodefilters>
+    <nodesSelectedByDefault>true</nodesSelectedByDefault>
+    <notification>
+      <onfailure>
+        <email attachLog='true' recipients='{{job.recipients}}' subject='{{job.subject}}' />
+      </onfailure>
+    </notification>
+    <notifyAvgDurationThreshold />
+    <schedule>
+      <month month='*' />
+      <time hour='02' minute='00' seconds='0' />
+      <weekday day='*' />
+      <year year='*' />
+    </schedule>
+    <scheduleEnabled>true</scheduleEnabled>
+    <sequence keepgoing='false' strategy='parallel'>
+      <command>
+        <script><![CDATA[#!/bin/sh
+
+docker system prune -a -f;
+
+docker volume prune -f;
+]]></script>
+        <scriptargs />
+      </command>
+    </sequence>
+    <uuid>{{job.uuid}}</uuid>
+  </job>
+</joblist>

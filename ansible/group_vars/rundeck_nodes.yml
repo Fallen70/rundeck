@@ -1,0 +1,26 @@
+#-------------------------------------------------------------------------------
+# RUNDECK's NODES DEFINITION
+# DEFAULT FIELDS TO PROVIDE FOR EACH NODE
+# name
+# description
+# tags
+# hostname
+# username
+# osArch
+# osFamily
+# osName
+# osVersion
+#-------------------------------------------------------------------------------
+# User pour accéder au machines
+rundeck_username: root
+nodes: 
+  - name: name
+    description: desctiption
+    tags: tag_1,tag_2
+    hostname: hostname
+    username: root
+    osArch: OsArch
+    osFamily: OsFamily
+    osName: OsName
+    osVersion: OsVersion
+

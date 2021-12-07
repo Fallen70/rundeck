@@ -1,0 +1,28 @@
+#--
+- debug:
+    msg: "This is the install.yml task list"
+
+- name: install the rundeck rpm from a remote repo
+  yum:
+    name: http://repo.rundeck.org/latest.rpm
+    state: present
+
+- name: install the needed packages
+  yum:
+    name: "{{ dependencies }}"
+    state: latest
+
+#-------------------------------------------------------------------------------
+## Init postgreSQL
+##-------------------------------------------------------------------------------
+
+- name: Check for pgdata directory
+  stat: path={{ postgresql_data_dir_default }}/base
+  register: stat_pgdata_base
+  failed_when: false
+
+- name: Initialize database
+  command: "{{ postgresql_setup_bin }} initdb"
+  when: (stat_pgdata_base.stat.isdir is not defined or not stat_pgdata_base.stat.isdir)
+
+

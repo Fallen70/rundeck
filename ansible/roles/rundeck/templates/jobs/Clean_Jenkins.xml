@@ -1,0 +1,70 @@
+<joblist>
+  <job>
+    <defaultTab>summary</defaultTab>
+    <description><![CDATA[Job to do Jenkins Application specific cleaning.
+We want to keep Jenkins up during cleaning process.]]></description>
+    <dispatch>
+      <excludePrecedence>true</excludePrecedence>
+      <keepgoing>false</keepgoing>
+      <rankOrder>ascending</rankOrder>
+      <successOnEmptyNodeFilter>false</successOnEmptyNodeFilter>
+      <threadcount>1</threadcount>
+    </dispatch>
+    <executionEnabled>{% if job.uuid in jobs_disable_execution %}false{% else %}true{% endif %}</executionEnabled>
+    <group>System/Scheduled</group>
+    <id>{{job.uuid}}</id>
+    <loglevel>INFO</loglevel>
+    <name>Clean Jenkins</name>
+    <nodeFilterEditable>false</nodeFilterEditable>
+    <nodefilters>
+      <filter>jenkins</filter>
+    </nodefilters>
+    <nodesSelectedByDefault>true</nodesSelectedByDefault>
+    <notification>
+      <onfailure>
+        <email recipients='{{job.recipients}}' subject='{{job.subject}}' />
+      </onfailure>
+    </notification>
+    <notifyAvgDurationThreshold />
+    <schedule>
+      <month month='*' />
+      <time hour='05' minute='00' seconds='0' />
+      <weekday day='WED' />
+      <year year='*' />
+    </schedule>
+    <scheduleEnabled>true</scheduleEnabled>
+    <sequence keepgoing='false' strategy='node-first'>
+      <command>
+        <script><![CDATA[#!/bin/bash
+
+export TOMCAT_DIR='/platform/jenkins/tomcat'
+export MVN_REPO_DIR='/platform/tools/m2'
+export CACHES_DIR='/platform/jenkins/jenkins_data/caches'
+
+# Clean catalina.out without restart
+echo 'Cleaning catalina.out'
+echo $(date)' Cleaned by rundeck' > ${TOMCAT_DIR}/logs/catalina.out
+
+# Cleaning mvn SNAPSHOT repository
+echo 'Cleaning SNAPSHOT repository'
+for snapshot_dir in $(find ${MVN_REPO_DIR} -ctime +14 -type d -name '*-SNAPSHOT' );
+  do rm -rvf $snapshot_dir;
+done;
+
+# Cleaning all mvn repository
+echo 'Cleaning all with atime > 60 days'
+for file in $(find ${MVN_REPO_DIR} -atime +60 -type f -name '*.pom'); 
+    do rm -rvf $( dirname $file ); 
+done;
+
+# Cleaning caches dir
+echo 'Cleaning caches dir'
+rm -rvf ${CACHES_DIR}/*
+
+]]></script>
+        <scriptargs />
+      </command>
+    </sequence>
+    <uuid>{{job.uuid}}</uuid>
+  </job>
+</joblist>

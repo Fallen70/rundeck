@@ -1,0 +1,24 @@
+apache_rp_ssl_cert: 'etc/pki/tls/certs/server.crt'
+apache_rp_ssl_key:  'etc/pki/tls/private/server.key'
+
+apache_config_vhosts:
+  - name: "http vhost"
+    listen: "*:80"
+    servername: "{{ inventory_hostname }}"
+    ssl_redirect : True
+
+apache_config_vhosts_ssl:
+  - name: "https vhost"
+    listen: "*:443"
+    servername: "{{ inventory_hostname }}"
+    ssl_certificate_file : "/{{ apache_rp_ssl_cert }}"
+    ssl_certificate_key_file : "/{{ apache_rp_ssl_key }}"
+    ssl_certificate_chain_file : ''
+    default_path: "/"
+    proxies :
+      - path: '/'
+        target_proto: 'http'
+        target_hostname: 'localhost'
+        target_port: '4440'
+        target_path: '/'
+

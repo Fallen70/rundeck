@@ -1,0 +1,50 @@
+<joblist>
+  <job>
+    <defaultTab>nodes</defaultTab>
+    <description>Job de nettoyage des fichiers et dossiers des workspaces des slave jenkins dépassant 250 Mo.</description>
+    <dispatch>
+      <excludePrecedence>true</excludePrecedence>
+      <keepgoing>false</keepgoing>
+      <rankOrder>ascending</rankOrder>
+      <successOnEmptyNodeFilter>false</successOnEmptyNodeFilter>
+      <threadcount>1</threadcount>
+    </dispatch>
+    <executionEnabled>{% if job.uuid in jobs_disable_execution %}false{% else %}true{% endif %}</executionEnabled>
+    <group>System/Scheduled</group>
+    <id>{{job.uuid}}</id>
+    <loglevel>INFO</loglevel>
+    <name>{{ job.name | default('Clean Jenkins Workspace') }}</name>
+    <nodeFilterEditable>false</nodeFilterEditable>
+    <nodefilters>
+      <filter>{{ job.filter | default('tags:jenkins') }}</filter>
+    </nodefilters>
+    <nodesSelectedByDefault>true</nodesSelectedByDefault>
+    <notification>
+      <onfailure>
+        <email attachLog='true' recipients='{{job.recipients}}' subject='{{job.subject}}' />
+      </onfailure>
+    </notification>
+    <notifyAvgDurationThreshold />
+    <schedule>
+      <month month='*' />
+      <time hour='04' minute='00' seconds='0' />
+      <weekday day='WED' />
+      <year year='*' />
+    </schedule>
+    <scheduleEnabled>true</scheduleEnabled>
+    <sequence keepgoing='false' strategy='node-first'>
+      <command>
+        <script><![CDATA[#!/bin/bash
+
+export WORKSPACE='/platform/jenkins/jenkins_data/workspace'
+
+for dir in $( du -s ${WORKSPACE}/* |  sort -n | awk '{if ($1 > 256000) print $2}' );
+do echo $( du -sh $dir );
+rm -rvf $dir;
+done;]]></script>
+        <scriptargs />
+      </command>
+    </sequence>
+    <uuid>{{job.uuid}}</uuid>
+  </job>
+</joblist>

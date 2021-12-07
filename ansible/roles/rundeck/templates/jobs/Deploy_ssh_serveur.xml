@@ -1,0 +1,74 @@
+<joblist>
+  <job>
+    <context>
+      <options preserveOrder='true'>
+        <option name='sshPubKey' required='true' type='file' />
+        <option name='user' value='root'>
+          <label>System user target</label>
+        </option>
+      </options>
+    </context>
+    <defaultTab>summary</defaultTab>
+    <description><![CDATA[Deploy ssh serveur
+
+Déploie la clé ssh d'un développeur sur l'ensemble des serveurs monitoré par rundeck.
+La clé publique doit être à l'emplacement : `~/.ssh/id_rsa.pub`
+Si le fichier n'existe pas, le générer avec `ssh-keygen`]]></description>
+    <dispatch>
+      <excludePrecedence>true</excludePrecedence>
+      <keepgoing>false</keepgoing>
+      <rankOrder>ascending</rankOrder>
+      <successOnEmptyNodeFilter>false</successOnEmptyNodeFilter>
+      <threadcount>1</threadcount>
+    </dispatch>
+    <executionEnabled>{% if job.uuid in jobs_disable_execution %}false{% else %}true{% endif %}</executionEnabled>
+    <group>System/Util</group>
+    <id>{{job.uuid}}</id>
+    <loglevel>INFO</loglevel>
+    <name>{{ job.name | default('Deploy ssh serveur') }}</name>
+    <nodeFilterEditable>false</nodeFilterEditable>
+    <nodefilters>
+      <filter>{{ job.filter | default('!name:rundeck') }}</filter>
+    </nodefilters>
+    <nodesSelectedByDefault>true</nodesSelectedByDefault>
+    <scheduleEnabled>false</scheduleEnabled>
+    <sequence keepgoing='false' strategy='node-first'>
+      <command>
+        <node-step-plugin type='copyfile'>
+          <configuration>
+            <entry key='destinationPath' value='/tmp/id_rsa.pub' />
+            <entry key='echo' value='true' />
+            <entry key='recursive' value='false' />
+            <entry key='sourcePath' value='${file.sshPubKey}' />
+          </configuration>
+        </node-step-plugin>
+      </command>
+      <command>
+        <script><![CDATA[PUB_KEY=/tmp/id_rsa.pub
+AUTHORIZED_KEY=~@option.user@/.ssh/authorized_keys
+COUNT_KEY_OCCURENCE=$(grep "$(cat ${PUB_KEY})" $AUTHORIZED_KEY | wc -l)
+
+echo "$COUNT_KEY_OCCURENCE"
+
+if [[ $COUNT_KEY_OCCURENCE -eq 0 ]]
+then
+  echo "Deploy key";
+  cp ${AUTHORIZED_KEY} ${AUTHORIZED_KEY}_prev
+  cat ${PUB_KEY} >> ${AUTHORIZED_KEY}
+  cat ${AUTHORIZED_KEY}
+else
+  echo "Key already present"
+fi
+
+rm ${PUB_KEY}
+
+exit 0
+
+
+]]></script>
+        <scriptargs />
+      </command>
+    </sequence>
+    <uuid>{{job.uuid}}</uuid>
+  </job>
+</joblist>

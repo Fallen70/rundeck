@@ -1,0 +1,5 @@
+#--
+- name: ensure openjdk rpm packages are uninstalled
+  shell: yum -y erase $(rpm -qa | grep openjdk)
+  args:
+    warn: no

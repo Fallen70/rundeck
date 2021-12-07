@@ -1,0 +1,5 @@
+
+
+#--
+- debug:
+    msg: "This is the uninstall_distrib.yml task list"

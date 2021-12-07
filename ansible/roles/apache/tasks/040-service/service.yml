@@ -1,0 +1,8 @@
+
+
+- name: enable service
+  systemd: name="{{apache_service_name}}" enabled=yes
+
+#--- restart service
+- name: restart service
+  service: name="{{apache_service_name}}" state=restarted

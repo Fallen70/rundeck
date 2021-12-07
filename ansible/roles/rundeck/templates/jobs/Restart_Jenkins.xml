@@ -1,0 +1,56 @@
+<joblist>
+  <job>
+    <defaultTab>summary</defaultTab>
+    <description>Will check if jenkins tomcat is down and start it once a day</description>
+    <dispatch>
+      <excludePrecedence>true</excludePrecedence>
+      <keepgoing>false</keepgoing>
+      <rankOrder>ascending</rankOrder>
+      <successOnEmptyNodeFilter>false</successOnEmptyNodeFilter>
+      <threadcount>1</threadcount>
+    </dispatch>
+    <executionEnabled>{% if job.uuid in jobs_disable_execution %}false{% else %}true{% endif %}</executionEnabled>
+    <group>System/Scheduled</group>
+    <id>{{job.uuid}}</id>
+    <loglevel>INFO</loglevel>
+    <name>Restart Jenkins</name>
+    <nodeFilterEditable>false</nodeFilterEditable>
+    <nodefilters>
+      <filter>tags: jenkins</filter>
+    </nodefilters>
+    <nodesSelectedByDefault>true</nodesSelectedByDefault>
+    <notification>
+      <onfailure>
+        <email attachLog='true' recipients='{{job.recipients}}' subject='{{job.subject}}' />
+      </onfailure>
+    </notification>
+    <notifyAvgDurationThreshold />
+    <schedule>
+      <month month='*' />
+      <time hour='07' minute='00' seconds='0' />
+      <weekday day='*' />
+      <year year='*' />
+    </schedule>
+    <scheduleEnabled>true</scheduleEnabled>
+    <sequence keepgoing='false' strategy='node-first'>
+      <command>
+        <script><![CDATA[# Check if service is running
+systemctl status tomcat.service
+
+# Service is not running we restart it and 
+# set return to a failure state
+if [ ${?} != 0 ]; 
+    then printf "Service not running";
+    systemctl start tomcat.service;
+    exit 1;
+fi
+
+# If we are here the service is running fine
+# we have nothing to do
+exit 0;]]></script>
+        <scriptargs />
+      </command>
+    </sequence>
+    <uuid>{{job.uuid}}</uuid>
+  </job>
+</joblist>

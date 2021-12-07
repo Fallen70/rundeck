@@ -1,0 +1,63 @@
+#-------------------------------------------------------------------------------
+# clean conf directories
+#-------------------------------------------------------------------------------
+- file:
+    path: "{{apache_server_root}}/{{item}}"
+    state: absent
+  with_items:
+    - conf
+    - conf.d
+
+- file:
+    path: "{{apache_server_root}}/{{item}}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  with_items:
+    - conf
+    - conf.d
+
+#-------------------------------------------------------------------------------
+# add standard configuration
+#-------------------------------------------------------------------------------
+- name: "Ensure configuration"
+  template:
+    src: "etc/httpd/{{item}}"
+    dest: "{{apache_server_root}}/{{item}}"
+    owner: "root"
+    group: "root"
+    mode: 0644
+  with_items:
+    - "conf/httpd.conf"
+    - "conf/magic"
+    - "conf.d/autoindex.conf"
+    - "conf.d/ssl.conf"
+    - "conf.d/userdir.conf"
+    - "conf.d/welcome.conf"
+
+
+#-------------------------------------------------------------------------------
+# Default site
+#-------------------------------------------------------------------------------
+- file:
+    path: "/var/www/html/"
+    state: absent
+
+- file:
+    path: "/var/www/html/"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+
+- name: "Ensure default site"
+  template:
+    src: "var/www/html/{{item}}"
+    dest: "/var/www/html/{{item}}"
+    owner: "root"
+    group: "root"
+    mode: 0644
+  with_items:
+    - "index.html"

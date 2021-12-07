@@ -1,0 +1,72 @@
+<joblist>
+  <job>
+    <context>
+      <options preserveOrder='true'>
+        <option name='host' required='true' value='{{ job.registry_host }}' />
+        <option name='port' required='true' value='{{ job.registry_port }}' />
+      </options>
+    </context>
+    <defaultTab>nodes</defaultTab>
+    <description>Mise a jour du certificat du registry pour les machines utilisant docker</description>
+    <dispatch>
+      <excludePrecedence>true</excludePrecedence>
+      <keepgoing>false</keepgoing>
+      <rankOrder>ascending</rankOrder>
+      <successOnEmptyNodeFilter>false</successOnEmptyNodeFilter>
+      <threadcount>1</threadcount>
+    </dispatch>
+    <executionEnabled>{% if job.uuid in jobs_disable_execution %}false{% else %}true{% endif %}</executionEnabled>
+    <group>System/Util/Certs/Clients</group>
+    <id>{{ job.uuid }}</id>
+    <loglevel>INFO</loglevel>
+    <name>{{ job.name | default('Update registry client cert') }}</name>
+    <nodeFilterEditable>false</nodeFilterEditable>
+    <nodefilters>
+      <filter>{{ job.filter | default('tags: docker') }}</filter>
+    </nodefilters>
+    <nodesSelectedByDefault>true</nodesSelectedByDefault>
+    <plugins />
+    <scheduleEnabled>true</scheduleEnabled>
+    <sequence keepgoing='false' strategy='node-first'>
+      <command>
+        <description>Récupération du certificat du registry en local</description>
+        <jobref group='System/Util/Certs/Common' name='Download certificate'>
+          <importOptions>true</importOptions>
+          <uuid>{{ job.download_job_uuid }}</uuid>
+        </jobref>
+      </command>
+      <command>
+        <description>Nettoyage du dossier cible</description>
+        <script><![CDATA[rm -vrf /tmp/certs/*
+mkdir -vp /tmp/certs/]]></script>
+        <scriptargs />
+      </command>
+      <command>
+        <description>Copie des fichiers pem téléchargés</description>
+        <node-step-plugin type='copyfile'>
+          <configuration>
+            <entry key='destinationPath' value='/tmp/certs/' />
+            <entry key='echo' value='true' />
+            <entry key='pattern' value='cert.*.pem' />
+            <entry key='recursive' value='true' />
+            <entry key='sourcePath' value='/tmp/certs/' />
+          </configuration>
+        </node-step-plugin>
+      </command>
+      <command>
+        <description>Mise a jour du certificat dans le dossier docker</description>
+        <script><![CDATA[#!/bin/bash
+export current_cert=$( basename /etc/docker/certs.d/@option.host@/*.crt )
+# backup
+mv -v /etc/docker/certs.d/@option.host@/${current_cert} /etc/docker/certs.d/@option.host@/${current_cert}.back
+# copie du pem on devrait en avoir qu'un
+cp -v /tmp/certs/cert.1.pem  /etc/docker/certs.d/@option.host@/ca.crt
+# Nettoyage
+rm -vrf /tmp/certs
+]]></script>
+        <scriptargs />
+      </command>
+    </sequence>
+    <uuid>{{ job.uuid }}</uuid>
+  </job>
+</joblist>

@@ -1,0 +1,9 @@
+
+
+#-- ensure package installation
+- name : "Ensure package installation"
+  yum:
+    name:
+      - "httpd-{{apache_version}}"
+      - "mod_ssl"
+    state: present

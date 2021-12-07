@@ -1,0 +1,34 @@
+
+#--
+# This list records all variable that must be defined at role execution
+required_vars:
+  - do_deps
+  - do_install
+  - do_uninstall_all
+  - do_uninstall_distrib
+  - do_drop_data
+  - dependencies
+  - rundeck_hostname
+  - rundeck_port
+  - rundeck_uuid
+  - rundeck_user
+  - rundeck_password
+  - jobs
+  - postgres_rundeck_database
+  - postgres_rundeck_user
+  - postgres_rundeck_password
+  - postgresql_data_dir_default
+  - postgresql_setup_bin
+  - postgresql_user
+  - postgresql_group
+
+#--
+# a list of dependencies that should be installed 
+dependencies:
+  - rundeck
+  - rundeck-cli
+  - postfix
+  - postgresql-server.x86_64
+  - postgresql.x86_64
+  - python-psycopg2.x86_64
+  - openssl

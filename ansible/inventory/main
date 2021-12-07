@@ -1,0 +1,8 @@
+[main:children]
+rundeck_servers
+rundeck_monitored_servers
+
+[rundeck_servers]
+rundeck
+
+[rundeck_monitored_servers]

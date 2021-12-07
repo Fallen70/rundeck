@@ -1,0 +1,56 @@
+<joblist>
+  <job>
+    <context>
+      <options preserveOrder='true'>
+        <option name='host' required='true'>
+          <label>Nom du serveur hébergeant le service</label>
+        </option>
+        <option name='java_path' required='true'>
+          <label>chemin de l'installation java a mettre à jour</label>
+        </option>
+        <option name='keystore_pass' required='true' value='changeme'>
+          <label>Mot de passe du keystore</label>
+        </option>
+      </options>
+    </context>
+    <defaultTab>nodes</defaultTab>
+    <description><![CDATA[Mie a jour du trustore d'un jdk
+Le/Les certificats doivent être déposé dans /tmp/certs ( Comme le job de Download )]]></description>
+    <dispatch>
+      <excludePrecedence>true</excludePrecedence>
+      <keepgoing>false</keepgoing>
+      <rankOrder>ascending</rankOrder>
+      <successOnEmptyNodeFilter>false</successOnEmptyNodeFilter>
+      <threadcount>1</threadcount>
+    </dispatch>
+    <executionEnabled>{% if job.uuid in jobs_disable_execution %}false{% else %}true{% endif %}</executionEnabled>
+    <group>System/Util/Certs/Common</group>
+    <id>{{ job.uuid }}</id>
+    <loglevel>INFO</loglevel>
+    <name>{{ job.name | default('Update java trustore') }}</name>
+    <nodeFilterEditable>true</nodeFilterEditable>
+    <nodefilters>
+      <filter>tags: changeme</filter>
+    </nodefilters>
+    <nodesSelectedByDefault>true</nodesSelectedByDefault>
+    <plugins />
+    <scheduleEnabled>true</scheduleEnabled>
+    <sequence keepgoing='false' strategy='node-first'>
+      <command>
+        <script><![CDATA[#!/bin/bash
+
+if [ -d @option.java_path@/bin ]
+    then for file  in $( ls /tmp/certs/*.pem );
+    do  ./keytool -import -alias @option.host@-${file} -keystore @option.java_path@/jre/lib/security/cacerts -trustcacerts -file ${file}  -storepass @option.keystore_pass@ -noprompt;
+    echo "Ajout alias @option.host@-${file} dans @option.java_path@/jre/lib/security/cacerts";
+    done;
+    else echo "@option.java_path@/bin : Introuvable"
+    exit 1
+fi
+    ]]></script>
+        <scriptargs />
+      </command>
+    </sequence>
+    <uuid>{{ job.uuid }}</uuid>
+  </job>
+</joblist>

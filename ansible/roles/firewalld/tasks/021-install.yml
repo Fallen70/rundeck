@@ -1,0 +1,55 @@
+
+
+#--
+#- name: "ensure firewall"
+#  firewalld:
+#    source: "{{item.source | default('0.0.0.0') }}"
+#    port: "{{item.port}}"
+#    permanent: "{{item.permanent|default('yes')}}"
+#    state: "{{item.state|default('enabled')}}"
+#    zone: "{{item.zone|default('public')}}"
+#  with_items: "{{firewalld_rules}}"
+
+- name: "Ensure firewalld package is installed"
+  yum:
+    name: "firewalld"
+    state: present
+
+- name: "Ensure services: {{ firewalld_services | join(',')  }}" 
+  firewalld:
+    service: "{{ item }}"
+    permanent: yes
+    state: enabled
+  with_items: "{{ firewalld_services }}"
+
+- name: "Ensure custom ports: {{ firewalld_ports | join(',')  }}" 
+  firewalld:
+    port: "{{ item }}"
+    state: enabled
+    permanent: yes
+  with_items: "{{ firewalld_ports }}"
+
+#-- enable
+- name: enable service
+  service: name=firewalld  enabled=yes
+  when: firewalld_enable is sameas true
+
+- name: enable service
+  service: name=firewalld  state=started
+  when: firewalld_enable is sameas true
+
+
+#-- disable
+- name: disable service when not enabled
+  service: name=firewalld  enabled=no
+  when: firewalld_enable is sameas false
+
+- name: disable service when not enabled
+  service: name=firewalld  state=stopped
+  when: firewalld_enable is sameas false
+
+
+#--
+- name: restart service
+  service: name=firewalld state=restarted
+  when: firewalld_enable is sameas true

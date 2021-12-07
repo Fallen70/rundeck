@@ -1,0 +1,45 @@
+#-------------------------------------------------------------------------------
+# cleanup
+#-------------------------------------------------------------------------------
+
+#--
+- name : "Ensure config dirs are absent"
+  file:
+    path: "{{apache_config_server_root}}/{{item}}"
+    state: absent
+  with_items: "{{apache_config_clean_directories}}"
+
+- name : "Ensure config dirs are present"
+  file:
+    path: "{{apache_config_server_root}}/{{item}}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  with_items: "{{apache_config_clean_directories}}"
+
+#-------------------------------------------------------------------------------
+# configuration
+#-------------------------------------------------------------------------------
+
+#--
+- name: Ensure main configuration
+  template:
+    src: "etc/httpd/conf/{{item}}"
+    dest: "{{apache_config_main_config_dir}}/{{item}}"
+  with_items: "{{apache_config_main_config_files}}"
+
+
+#--
+- name: Ensure additional configuration
+  template:
+    src: "etc/httpd/conf.d/{{item}}"
+    dest: "{{apache_config_additional_config_dir}}/{{item}}"
+  with_items: "{{apache_config_additional_config_files}}"
+
+
+- name: Ensure default vhosts
+  template:
+    src: "etc/httpd/conf.d/{{item}}"
+    dest: "{{apache_config_vhost_dir}}/{{item}}"
+  with_items: "{{apache_config_vhost_files}}"

@@ -1,0 +1,52 @@
+#
+#
+# Ansible role for rundeck
+#
+#-------------------------------------------------------------------------------
+# check variables
+# This makes sure that all variables defined in the required_vars list are
+# defined prior to starting the role tasks
+#-------------------------------------------------------------------------------
+- name: "Check required variables"
+  fail: msg="Variable '{{item}}' is not defined"
+  when: item not in vars
+  with_items: "{{required_vars}}"
+
+#-------------------------------------------------------------------------------
+- include_tasks: uninstall-distrib.yml
+  when : (do_uninstall_distrib|bool) or (do_uninstall_all|bool)
+
+#-------------------------------------------------------------------------------
+- include_tasks: structure.yml
+  when : (do_install|bool)
+
+#-------------------------------------------------------------------------------
+- include_tasks: install.yml
+  when : (do_install|bool)
+
+#-------------------------------------------------------------------------------
+- include_tasks: configure.yml
+  when : (do_install|bool)
+
+#-------------------------------------------------------------------------------
+- include_tasks: service.yml
+  when : (do_install|bool)
+
+#-------------------------------------------------------------------------------
+- name: Wait 180 seconds for port 4440 of any 
+  wait_for:
+    host: 0.0.0.0
+    port: 4440
+    delay: 60
+    state: drained
+    timeout: 180
+    connect_timeout: 15
+  when : (do_install|bool)
+
+#-------------------------------------------------------------------------------
+- include_tasks: import_jobs.yml
+  with_items:
+    - "{{jobs}}"
+  loop_control:
+    loop_var: job
+  when : (do_install|bool)

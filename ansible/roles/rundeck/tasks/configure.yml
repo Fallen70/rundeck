@@ -1,0 +1,63 @@
+#--
+- debug:
+    msg: "This is the configure.yml task list"
+
+- name: ensure main configuration
+  template:
+    src: "{{item}}"
+    dest: "/{{item}}"
+    owner: rundeck
+    group: rundeck
+  with_items:
+    - etc/rundeck/framework.properties 
+    - etc/rundeck/rundeck-config.properties
+    - etc/rundeck/admin.aclpolicy
+    - etc/postfix/main.cf
+
+- name: copy host specific files 
+  template:
+    src: "files/{{ inventory_hostname }}/{{item}}"
+    dest: "/{{item}}"
+    owner: rundeck
+    group: rundeck
+  with_items:
+    - etc/rundeck/realm.properties
+    - "var/rundeck/projects/{{ rundeck_project }}/etc/resources.xml"
+    - "var/rundeck/projects/{{ rundeck_project }}/etc/project.properties"
+
+- name: ensure rd client configuration 
+  template:
+    src: ".rd/rd.conf"
+    dest: "~/.rd/rd.conf"
+    mode: "0400"
+
+#--- Crréation de la Base postgres
+- name: ensure pgsql configuration
+  template:
+    src: "{{item}}"
+    dest: "/{{item}}"
+    owner: "{{ postgresql_user }}" 
+    group: "{{ postgresql_group }}"
+  with_items:
+    - var/lib/pgsql/data/pg_hba.conf
+
+- name: enable service postgresql
+  systemd: name=postgresql enabled=yes
+
+- name: restart service postgresql
+  service: name=postgresql state=restarted
+
+- name: "Create database with name {{ postgres_rundeck_database }} "
+  become: true
+  become_user: "{{ postgresql_user }}"
+  postgresql_db:
+    name: "{{ postgres_rundeck_database }}"
+
+- name: "Connect to {{ postgres_rundeck_database }} database, create {{ postgres_rundeck_user }} user, and grant ALL access"
+  become: true
+  become_user: "{{ postgresql_user }}"
+  postgresql_user:
+    db: "{{ postgres_rundeck_database }}"
+    name: "{{ postgres_rundeck_user }}"
+    password: "{{ postgres_rundeck_password }}"
+    priv: ALL

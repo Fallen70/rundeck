@@ -1,0 +1,15 @@
+
+
+#-------------------------------------------------------------------------------
+# modules
+#-------------------------------------------------------------------------------
+
+- file: path="{{apache_config_server_root}}/conf/modules.conf" state="absent"
+- file: path="{{apache_config_server_root}}/conf/modules.conf" state="touch"
+
+- name: "Ensure additionnal modules"
+  lineinfile:
+    path: "{{apache_config_server_root}}/conf/modules.conf"
+    line: "LoadModule {{item}}_module modules/mod_{{item}}.so"
+  with_items:
+    - "{{apache_config_modules}}"

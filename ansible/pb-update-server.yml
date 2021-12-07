@@ -1,0 +1,58 @@
+# update packages
+- hosts: rundeck_servers
+  remote_user: root
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: "Update yum cache"
+      shell: yum makecache fast
+      args:
+        warn: false
+      tags:
+      - always
+
+    - name: "Get latest yum-utils"
+      yum:
+        name: yum-utils
+        state: latest
+      tags:
+      - always
+
+    - name: "Get package list to update"
+      shell: "yum list updates" 
+      args:
+        warn: false
+      register: packages
+      tags:
+      - always
+
+    - name: "Packages list"
+      debug:
+        var: packages.stdout_lines
+      tags:
+      - always
+
+    - name: "Update packages"
+      yum:
+        name: "*"
+        state: latest
+      tags:
+      - never
+      - update
+
+    - name: Reboot required - Step 1
+      command: needs-restarting -r
+      register: reboot_required
+      ignore_errors: True
+      changed_when: False
+      tags:
+      - always
+
+    - name: Reboot required - Step 2
+      shell: ( /bin/sleep 5 ; shutdown -r now "Ansible updates triggered" ) &
+      async: 30
+      poll: 0
+      ignore_errors: true
+      when: reboot_required.rc == 1
+      tags:
+      - always

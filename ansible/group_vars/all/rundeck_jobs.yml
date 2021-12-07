@@ -1,0 +1,64 @@
+rundeck_notification_subject: "${notification.eventStatus} [{{ rundeck_project }}] ${job.name}"
+# Par défaut pas de job désactivé
+jobs_disable_execution: []
+rundeck_disk_default_rate: 80
+#-------------------------------------------------------------------------------
+# Définition des jobs
+# les templates sont dans roles/rundeck/templates/jobs/
+#-------------------------------------------------------------------------------
+jobs:
+  - template: jobs/disk_check.xml
+    uuid: 0c337465-effe-4226-89d6-f4d44481cb66
+    project: "{{ rundeck_project }}"
+    recipients: "{{ rundeck_recipients }}"
+    subject: "{{ rundeck_notification_subject }}"
+    rate: "{{ rundeck_disk_default_rate }}"
+  - template: jobs/Clean_Jenkins.xml
+    uuid: b9b4fe54-52f4-46b6-8dd9-8d69a1bb22f4
+    project: "{{ rundeck_project }}"
+    recipients: "{{ rundeck_recipients }}"
+    subject: "{{ rundeck_notification_subject }}"
+  - template: jobs/Deploy_ssh_serveur.xml
+    uuid: 34c0e3c7-df7e-49b5-9c1e-2d2be682395e
+    project: "{{ rundeck_project }}"
+    name: Deploy ssh public key 
+    filter: "!name:rundeck"
+  - template: jobs/Check_ssl_certificate_expiration_date.xml
+    uuid: fbe82750-2f08-422d-98f0-dcf87bb8701f
+    project: "{{ rundeck_project }}"
+    subject: "{{ rundeck_notification_subject }}"
+    recipients: "{{ rundeck_recipients }}"
+    name: Check ssl certificate expiration date
+    filter: "!ssl: no"
+  - template: jobs/Cleaning_Docker.xml
+    uuid: 096819d0-501a-4a3d-bffa-629932eb63ce
+    project: "{{ rundeck_project }}"
+    recipients: "{{ rundeck_recipients }}"
+    subject: "{{ rundeck_notification_subject }}"
+    filter: "tags: docker"
+  - template: jobs/Clean_Jenkins_Workspace.xml
+    uuid: a6d2e44d-89db-4326-a2ab-4cf5aea52845
+    project: "{{ rundeck_project }}"
+    recipients: "{{ rundeck_recipients }}"
+    subject: "{{ rundeck_notification_subject }}"
+  - template: jobs/Clean_Slave_Jenkins_NPM.xml
+    uuid: ad29388c-8b05-4763-822b-322910f5452d
+    project: "{{ rundeck_project }}"
+    recipients: "{{ rundeck_recipients }}"
+    subject: "{{ rundeck_notification_subject }}"
+  - template: jobs/Download_certificate.xml
+    uuid: 40489283-ab8c-406e-a931-47e8e0274821
+    project: "{{ rundeck_project }}"
+    recipients: "{{ rundeck_recipients }}"
+    subject: "{{ rundeck_notification_subject }}"
+  - template: jobs/Generate_self_signed_cert.xml
+    uuid: daa5236a-9789-4f7d-a7af-8e86b4d8bc08 
+    project: "{{ rundeck_project }}"
+    recipients: "{{ rundeck_recipients }}"
+    subject: "{{ rundeck_notification_subject }}"
+  - template: jobs/Update_cert_httpd_server.xml
+    uuid: 84bb0efa-b2cc-47c9-8352-63a95c08780d 
+    project: "{{ rundeck_project }}"
+    recipients: "{{ rundeck_recipients }}"
+    subject: "{{ rundeck_notification_subject }}"
+    generate_job_uuid: daa5236a-9789-4f7d-a7af-8e86b4d8bc08

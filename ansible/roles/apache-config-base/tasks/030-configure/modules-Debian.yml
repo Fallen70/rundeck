@@ -1,0 +1,14 @@
+
+#-------------------------------------------------------------------------------
+# modules
+#-------------------------------------------------------------------------------
+
+- name : "Ensure basic  modules are enabled"
+  file:
+    src: "{{apache_config_server_root}}/mods-available/{{item}}"
+    dest: "{{apache_config_server_root}}/mods-enabled/{{item}}"
+    state: "link"
+    owner: "root"
+    group: "root"
+  with_items:
+    - "{{apache_config_modules}}"

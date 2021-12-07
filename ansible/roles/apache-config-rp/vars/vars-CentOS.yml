@@ -1,0 +1,24 @@
+
+#-- name of the service
+apache_config_service_name: httpd
+
+#-- root dir for apache config
+apache_config_server_root: /etc/httpd
+apache_config_log_dir: /var/log/httpd
+
+
+#-- list of module that should be loaded
+apache_config_modules:
+  - proxy
+  - proxy_ajp
+  - proxy_http
+  - proxy_balancer
+  - proxy_connect
+  - slotmem_shm
+  - alias
+  - lbmethod_bybusyness
+  - lbmethod_byrequests
+  - lbmethod_bytraffic
+
+apache_config_ssl_default_ssl_certificate_file: /etc/pki/tls/certs/localhost.crt
+apache_config_ssl_default_ssl_certificate_keyfile: /etc/pki/tls/private/localhost.key

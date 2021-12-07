@@ -1,0 +1,46 @@
+<joblist>
+  <job>
+    <defaultTab>nodes</defaultTab>
+    <description>Job de nettoyage du cache npm sur les slave jenkins en mesure d'executer la commande npm.</description>
+    <dispatch>
+      <excludePrecedence>true</excludePrecedence>
+      <keepgoing>false</keepgoing>
+      <rankOrder>ascending</rankOrder>
+      <successOnEmptyNodeFilter>false</successOnEmptyNodeFilter>
+      <threadcount>1</threadcount>
+    </dispatch>
+    <executionEnabled>{% if job.uuid in jobs_disable_execution %}false{% else %}true{% endif %}</executionEnabled>
+    <group>System/Scheduled</group>
+    <id>{{job.uuid}}</id>
+    <loglevel>INFO</loglevel>
+    <name>{{ job.name | default('Clean Slave Jenkins NPM') }}</name>
+    <nodeFilterEditable>false</nodeFilterEditable>
+    <nodefilters>
+      <filter>{{ job.filter | default('tags:jenkins+npm role:slave') }}</filter>
+    </nodefilters>
+    <nodesSelectedByDefault>true</nodesSelectedByDefault>
+    <notification>
+      <onfailure>
+        <email attachLog='true' recipients='{{job.recipients}}' subject='{{job.subject}}' />
+      </onfailure>
+    </notification>
+    <notifyAvgDurationThreshold />
+    <plugins />
+    <schedule>
+      <month month='*' />
+      <time hour='04' minute='00' seconds='0' />
+      <weekday day='*' />
+      <year year='*' />
+    </schedule>
+    <scheduleEnabled>true</scheduleEnabled>
+    <sequence keepgoing='false' strategy='node-first'>
+      <command>
+        <script><![CDATA[#!/bin/bash
+
+su - platform -c 'npm cache clean']]></script>
+        <scriptargs />
+      </command>
+    </sequence>
+    <uuid>{{job.uuid}}</uuid>
+  </job>
+</joblist>

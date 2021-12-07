@@ -1,0 +1,30 @@
+#--
+- debug:
+    msg: "This is the structure.yml task list"
+
+- name: Ensure group rundeck exists
+  group:
+    name: rundeck
+    state: present
+
+
+- name: Add the user 'rundeck' as member of 'rundeck'
+  user:
+    name: "rundeck"
+    group: "rundeck"
+
+- name: Creating project
+  file:
+    path: "{{item}}"
+    state: directory
+    owner: rundeck
+    group: rundeck
+  with_items:
+    - "/var/rundeck/projects/{{ rundeck_project }}/acls"
+    - "/var/rundeck/projects/{{ rundeck_project }}/etc"
+
+- name: Create rd client directory
+  file:
+    path: "~/.rd"
+    state: directory
+    mode: 0700

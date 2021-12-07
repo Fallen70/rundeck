@@ -1,0 +1,60 @@
+<joblist>
+  <job>
+    <context>
+      <options preserveOrder='true'>
+        <option name='host' required='true'>
+          <label>FQDN qui héberge le certificat</label>
+        </option>
+        <option name='key_duration' value='365'>
+          <label>Durée du certificat en jours</label>
+        </option>
+        <option name='key_size' required='true' value='2048'>
+          <label>Taille de la clef</label>
+        </option>
+      </options>
+    </context>
+    <defaultTab>nodes</defaultTab>
+    <description><![CDATA[Job pour générer en local des certificats auto-signé
+
+les cetifucats seront déposé dans /tmp/{host}]]></description>
+    <executionEnabled>{% if job.uuid in jobs_disable_execution %}false{% else %}true{% endif %}</executionEnabled>
+    <group>System/Util/Certs/Common</group>
+    <id>{{ job.uuid }}</id>
+    <loglevel>INFO</loglevel>
+    <name>{{ job.name | default('Generate self signed cert') }}</name>
+    <nodeFilterEditable>false</nodeFilterEditable>
+    <plugins />
+    <scheduleEnabled>true</scheduleEnabled>
+    <sequence keepgoing='false' strategy='node-first'>
+      <command>
+        <description>Génération du certificat</description>
+        <script><![CDATA[#!/bin/bash
+
+# Nettoyage du dossier temporaire cible
+rm -rf /tmp/@option.host@
+mkdir -p /tmp/@option.host@
+
+# Définition des fichiers cible
+export key="/tmp/@option.host@/@option.host@.key"
+export csr="/tmp/@option.host@/@option.host@.csr"
+export srl="/tmp/@option.host@/@option.host@.srl"
+export crt="/tmp/@option.host@/@option.host@.crt"
+
+#-- generate key
+openssl genrsa -out ${key}  $RD_OPTION_KEY_SIZE
+
+#-- generate csr
+openssl req -new -key ${key} -out ${csr} -subj "/CN=@option.host@"
+
+#-- generate self siging key
+openssl x509 -req -days $RD_OPTION_KEY_DURATION -in ${csr} -signkey ${key} -out ${crt}
+
+#-- cleanup
+rm -f ${srl}
+]]></script>
+        <scriptargs />
+      </command>
+    </sequence>
+    <uuid>{{ job.uuid }}</uuid>
+  </job>
+</joblist>

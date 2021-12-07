@@ -1,0 +1,146 @@
+#-------------------------------------------------------------------------------
+# cleanup
+#-------------------------------------------------------------------------------
+
+# clean  directories
+- file:
+    path: "{{apache_server_root}}/{{item}}"
+    state: absent
+  with_items:
+    - mods-enabled
+    - conf-available
+    - conf-enabled
+    - sites-enabled
+    - sites-available
+
+- file:
+    path: "{{apache_server_root}}/{{item}}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  with_items:
+    - mods-enabled
+    - conf-available
+    - conf-enabled
+    - sites-enabled
+    - sites-available
+
+
+#-------------------------------------------------------------------------------
+# add standard configuration
+#-------------------------------------------------------------------------------
+
+- name: "Ensure configuration"
+  template:
+    src: "etc/apache2/conf-available/{{item}}"
+    dest: "{{apache_server_root}}/conf-enabled/{{item}}"
+    owner: "root"
+    group: "root"
+    mode: 0644
+  with_items:
+    - "charset.conf"
+    - "localized-error-pages.conf"
+    - "other-vhosts-access-log.conf"
+    - "security.conf"
+    - "serve-cgi-bin.conf"
+
+#-------------------------------------------------------------------------------
+# Modules
+#-------------------------------------------------------------------------------
+#--
+- name : "Ensure standard modules are enabled"
+  file:
+    src: "{{apache_server_root}}/mods-available/{{item}}"
+    dest: "{{apache_server_root}}/mods-enabled/{{item}}"
+    state: "link"
+    owner: "root"
+    group: "root"
+  with_items:
+    - access_compat.load
+    - alias.conf
+    - alias.load
+    - auth_basic.load
+    - authn_core.load
+    - authn_file.load
+    - authz_core.load
+    - authz_host.load
+    - authz_user.load
+    - autoindex.conf
+    - autoindex.load
+    - deflate.conf
+    - deflate.load
+    - dir.conf
+    - dir.load
+    - env.load
+    - filter.load
+    - mime.conf
+    - mime.load
+    - mpm_event.conf
+    - mpm_event.load
+    - negotiation.conf
+    - negotiation.load
+    - reqtimeout.conf
+    - reqtimeout.load
+    - setenvif.conf
+    - setenvif.load
+    - status.conf
+    - status.load
+
+
+#--
+- name : "Ensure additional modules are enabled"
+  file:
+    src: "{{apache_server_root}}/mods-available/{{item}}"
+    dest: "{{apache_server_root}}/mods-enabled/{{item}}"
+    state: "link"
+    owner: "root"
+    group: "root"
+  with_items:
+    - ssl.conf
+    - ssl.load
+    - socache_shmcb.load
+
+
+
+#-------------------------------------------------------------------------------
+# Enable sites
+#-------------------------------------------------------------------------------
+
+- name: "Ensure additional sites"
+  template:
+    src: "etc/apache2/sites-available/{{item}}"
+    dest: "{{apache_server_root}}/sites-enabled/{{item}}"
+    owner: "root"
+    group: "root"
+    mode: 0644
+  with_items:
+    - "000-default.conf"
+    - "default-ssl.conf"
+
+
+#-------------------------------------------------------------------------------
+# Set default site
+#-------------------------------------------------------------------------------
+
+- file:
+    path: "/var/www/html/"
+    state: absent
+
+- file:
+    path: "/var/www/html/"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+#--
+- name: "Ensure default site"
+  template:
+    src: "var/www/html/{{item}}"
+    dest: "/var/www/html/{{item}}"
+    owner: "root"
+    group: "root"
+    mode: 0644
+  with_items:
+    - "index.html"

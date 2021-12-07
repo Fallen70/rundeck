@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project>
+  {% for node in nodes %}
+  <node
+    {% for key, value in node.iteritems() %}
+    {{key}}="{{value}}" 
+    {% endfor %}
+  />
+  {% endfor %}
+</project>

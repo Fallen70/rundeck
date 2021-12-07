@@ -1,0 +1,26 @@
+
+
+#-- name of the service
+apache_config_service_name: apache2
+
+#-- root dir for apache config
+apache_config_server_root: /etc/apache2
+apache_config_log_dir: /var/log/apache2
+
+
+#-- list of module that should be loaded
+apache_config_modules:
+  #-- for proxy
+  - proxy.load
+  - proxy_ajp.load
+  - proxy_http.load
+  - proxy_balancer.load
+  - proxy_connect.load
+  - slotmem_shm.load
+  - alias.load
+  - lbmethod_bybusyness.load
+  - lbmethod_byrequests.load
+  - lbmethod_bytraffic.load
+
+apache_config_ssl_default_ssl_certificate_file: /etc/ssl/certs/ssl-cert-snakeoil.pem
+apache_config_ssl_default_ssl_certificate_keyfile: /etc/ssl/private/ssl-cert-snakeoil.key

@@ -1,0 +1,73 @@
+
+
+apache_config_user: www-data
+apache_config_group: www-data
+apache_config_service_name: apache2
+apache_config_server_root: /etc/apache2
+apache_config_log_dir: /var/log/apache2
+
+apache_config_tree:
+  - "{{apache_config_server_root}}"
+  - "{{apache_config_server_root}}/conf-available"
+  - "{{apache_config_server_root}}/conf-enabled"
+  - "{{apache_config_server_root}}/mods-available"
+  - "{{apache_config_server_root}}/mods-enabled"
+  - "{{apache_config_server_root}}/sites-available"
+  - "{{apache_config_server_root}}/sites-enabled"
+
+
+apache_config_clean_directories:
+  - "mods-enabled"
+  - "conf-enabled"
+  - "conf-available"
+  - "sites-available"
+  - "sites-enabled"
+
+
+
+#-- document root from which to serve files
+apache_config_document_root_parent: "/var/www/"
+apache_config_document_root: "{{apache_config_document_root_parent}}/html"
+
+apache_config_main_config_dir: "{{apache_config_server_root}}"
+apache_config_additional_config_dir: "{{apache_config_server_root}}/conf-enabled"
+apache_config_vhost_dir: "{{apache_config_server_root}}/sites-enabled"
+
+
+apache_config_main_config_files:
+  - ports.conf
+
+apache_config_additional_config_files:
+    - 01-default.conf
+    - 10-ssl-debian.conf
+    - 20-status.conf
+    - 21-caching.conf
+    - 22-deflate.conf
+    - welcome.conf
+
+
+#-- list of module that should be loaded
+apache_config_modules:
+  #-- minimal set
+  - mime.load
+  - mime.conf
+  - dir.load
+  - authz_core.load
+  # mpm: event
+  - mpm_event.load
+  #-- ssl
+  - ssl.load
+  - setenvif.load
+  - socache_shmcb.load
+  #-- status
+  - status.load
+  - info.load
+  #-- for caching
+  - headers.load
+  - expires.load
+  - deflate.load
+  - filter.load
+
+#-- SSL config (default)
+apache_config_ssl_default_ssl_certificate_file: /etc/ssl/certs/ssl-cert-snakeoil.pem
+apache_config_ssl_default_ssl_certificate_keyfile: /etc/ssl/private/ssl-cert-snakeoil.key

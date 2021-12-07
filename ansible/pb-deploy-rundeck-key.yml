@@ -1,0 +1,11 @@
+- hosts: rundeck_monitored_servers
+  remote_user: root
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: "Authorisation for monitored servers" 
+      authorized_key:
+        user: "{{rundeck_username}}"
+        state: present
+        key: "{{ lookup('file', 'files/{{ rundeck_hostname }}/ssh_pub/id_rsa.pub') }}"
+  tags: always

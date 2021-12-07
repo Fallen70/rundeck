@@ -1,0 +1,71 @@
+#
+#
+# Ansible role for <INSERT DESCRIPTION HERE>
+#
+#
+#-------------------------------------------------------------------------------
+# Check OS is supported
+#-------------------------------------------------------------------------------
+- set_fact:
+    os_distribution_version: "{{ansible_distribution}}-{{ansible_distribution_major_version}}"
+  tags: always
+
+- name: "Check {{os_distribution_version}} is supported by this role"
+  fail: msg="OS '{{ os_distribution_version }}' is not supported for this role"
+  when: "os_distribution_version not in role_supported_os"
+
+#-------------------------------------------------------------------------------
+# Load variable from OS Specific locations
+#-------------------------------------------------------------------------------
+- name: Gather OS Specific Variables for {{ansible_distribution}}-{{ansible_distribution_major_version}}
+  include_vars: "{{item}}"
+  with_first_found:
+    - files:
+      - "../vars/vars-{{ansible_distribution}}-{{ansible_distribution_major_version}}.yml"
+      - "../vars/vars-{{ansible_distribution}}.yml"
+      skip: true
+
+# Note: using ansible 2.8+, remove skip parameter and replace with
+# ignore_errors: true
+# at same level as with_first_found
+
+#-------------------------------------------------------------------------------
+# check variables
+# This makes sure that all variables defined in the required_vars list are
+# defined prior to starting the role tasks
+#-------------------------------------------------------------------------------
+- name: "Check required variables"
+  fail: msg="Variable '{{item}}' is not defined"
+  when: item not in vars
+  with_items: "{{required_vars}}"
+
+
+#-------------------------------------------------------------------------------
+- include_tasks: "{{file_item}}"
+  with_first_found:
+    - "021-install/install-{{ansible_distribution}}-{{ansible_distribution_major_version}}.yml"
+    - "021-install/install-{{ansible_distribution}}.yml"
+    - "021-install/install.yml"
+  loop_control:
+    loop_var: file_item
+  when : (do_install|bool)
+
+#-------------------------------------------------------------------------------
+- include_tasks: "{{file_item}}"
+  with_first_found:
+    - "030-configure/configure-{{ansible_distribution}}-{{ansible_distribution_major_version}}.yml"
+    - "030-configure/configure-{{ansible_distribution}}.yml"
+    - "030-configure/configure.yml"
+  loop_control:
+    loop_var: file_item
+  when : (do_install|bool)
+
+#-------------------------------------------------------------------------------
+- include_tasks: "{{file_item}}"
+  with_first_found:
+    - "040-service/service-{{ansible_distribution}}-{{ansible_distribution_major_version}}.yml"
+    - "040-service/service-{{ansible_distribution}}.yml"
+    - "040-service/service.yml"
+  loop_control:
+    loop_var: file_item
+  when : (do_install|bool)

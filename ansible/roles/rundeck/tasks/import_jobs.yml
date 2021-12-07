@@ -1,0 +1,16 @@
+- pause:
+    seconds: 20
+
+#-- Do import jobs in rundeck
+- name: "{{job.project}} copy template {{job.template}}"
+  template:
+    src: "{{job.template}}"
+    dest: "/tmp/job.xml"
+
+- name: "import job for {{job.project}} project"
+  command: "rd jobs load -f /tmp/job.xml -p {{job.project}}"
+
+- name: "{{job.project}} delete template"
+  file:
+    path: "/tmp/job.xml"
+    state: absent
